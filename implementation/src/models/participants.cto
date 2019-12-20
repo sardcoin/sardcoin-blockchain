@@ -1,0 +1,63 @@
+namespace eu.sardcoin.participants
+
+import eu.sardcoin.base.*
+
+
+
+enum PersonType{
+  o NATURAL
+  o LEGAL
+}
+
+
+participant Producer identified by id {
+  o String id
+  --> Person p
+}
+
+
+participant Consumer identified by id{
+  o String id
+  --> Person p
+}
+
+
+participant Verifier identified by id{
+  o String id
+  --> Person p
+}
+
+
+participant Broker extends Executor {
+  o String id
+  --> Person p
+}
+
+
+participant Administrator identified by id{
+  o String id
+  --> Person p
+}
+
+
+participant NaturalPerson extends Person {
+  o String firstName
+  o String[] middleNames optional
+  o String lastName
+  o String fiscalCode
+}
+
+
+participant LegalPerson extends Person {
+  o String businessName
+  o String vatNumber
+  o Address headquarters
+  --> NaturalPerson CEO optional
+}
+
+
+participant Person identified by id {
+  o String id
+  o PersonType type
+  o Integer reputation default = 10000
+}

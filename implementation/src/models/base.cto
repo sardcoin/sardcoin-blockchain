@@ -1,0 +1,13 @@
+namespace eu.sardcoin.base
+
+concept Address {
+  o String city
+  o String country
+  o String locality optional
+  o String region optional
+  o String street optional
+  o String street2 optional
+  o String street3 optional
+  o String postalCode
+  o String postOfficeBoxNumber optional
+}
