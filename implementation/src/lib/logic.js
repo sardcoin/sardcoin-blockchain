@@ -55,7 +55,7 @@ function fxDeleteCoupon(tx){
   // The coupon must be in the CREATED state and the must be created less than 24h ago
   var editDeadline = new Date(tx.coupon.creationTime.getTime() + (60*60*1000*24));
   if((tx.timestamp > editDeadline) || (tx.coupon.state !== 'CREATED')){
-    throw new Error('Edit deadline expired');
+    throw new Error('Delete deadline expired');
   }
 
   // The coupon is now CANCELED
@@ -64,6 +64,60 @@ function fxDeleteCoupon(tx){
   return tx;
 }
 
+
+
+/**
+ * A producer edits a coupon.
+ * @param {eu.sardcoin.transactions.EditCoupon} tx The transaction instance.
+ * @transaction
+ * 
+ * CdU_3b
+ */
+async function onEditCoupon(tx){
+
+  result = fxEditCoupon(tx);
+
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(result.coupon);
+}
+
+function fxEditCoupon(tx){
+  // The caller must be the producer of the coupon
+  if(tx.caller !== tx.coupon.producer){
+    throw new Error('Only the Producer of this coupon is authorized to edit it');
+  }
+
+  // The coupon must be in the CREATED state and the must be created less than 24h ago
+  var editDeadline = new Date(tx.coupon.creationTime.getTime() + (60*60*1000*24));
+  if((tx.timestamp > editDeadline) || (tx.coupon.state !== 'CREATED')){
+    throw new Error('Edit deadline expired');
+  }
+
+  // Replace old attributes with new values
+  if(tx.title !== null)
+    tx.coupon.title = tx.title;
+  
+  if(tx.price !== null)
+    tx.coupon.price = tx.price;
+
+  if(tx.economicValue !== null)
+    tx.coupon.economicValue = tx.economicValue;
+
+  if(tx.expirationTime !== null)
+    tx.coupon.expirationTime = tx.expirationTime;
+
+  if(tx.dateConstraints !== null)
+    tx.coupon.dateConstraints = tx.dateConstraints;
+
+  if(tx.placeConstraints !== null)
+    tx.coupon.placeConstraints = tx.placeConstraints;
+
+  if(tx.verifiers !== null)
+    tx.coupon.verifiers = tx.verifiers;
+
+  return tx;
+}
 
 
 /**
