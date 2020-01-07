@@ -1,9 +1,41 @@
 /**
+ * The deadline for editing a coupon is expired, the coupon is now available.
+ * @param {eu.sardcoin.transactions.PublishCoupon} tx The transaction instance.
+ * @transaction
+ * 
+ * CdU_3a
+ */
+async function onPublishCoupon(tx){
+  result = fxPublishCoupon(tx);
+
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(result.coupon);
+}
+
+function fxPublishCoupon(tx){
+  // The coupon must be in the CREATED state
+  if(tx.coupon.state !== 'CREATED'){
+    throw new Error('Only CREATED coupons can be published');
+  }
+
+  // The coupon must be created more than 24h ago
+  var editDeadline = new Date(tx.coupon.creationTime.getTime() + (60*60*1000*24));
+  if(tx.timestamp < editDeadline){
+    throw new Error('Edit deadline not expired yet');
+  }
+
+  tx.coupon.state = 'AVAILABLE';
+}
+
+
+
+/**
  * A producer deletes a coupon.
  * @param {eu.sardcoin.transactions.DeleteCoupon} tx The transaction instance.
  * @transaction
  * 
- * CdU_3
+ * CdU_3b
  */
 async function onDeleteCoupon(tx){
 
@@ -21,8 +53,8 @@ function fxDeleteCoupon(tx){
   }
 
   // The coupon must be in the CREATED state and the must be created less than 24h ago
-  var editDeadline = new Date(tx.coupon.creationTime).setTime(acceptanceDeadline.getTime() + (60*60*1000*24));
-  if(tx.timestamp > editDeadline){
+  var editDeadline = new Date(tx.coupon.creationTime.getTime() + (60*60*1000*24));
+  if((tx.timestamp > editDeadline) || (tx.coupon.state !== 'CREATED')){
     throw new Error('Edit deadline expired');
   }
 
@@ -31,6 +63,7 @@ function fxDeleteCoupon(tx){
 
   return tx;
 }
+
 
 
 /**
