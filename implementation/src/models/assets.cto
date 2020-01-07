@@ -24,7 +24,8 @@ asset Coupon identified by couponId {
   o String title
   o Double price
   o Double economicValue
-  o DateTime expirationDate optional
+  o DateTime creationTime
+  o DateTime expirationTime optional
   o DateTime[] dateConstraints optional
   o String[] placeConstraints optional
   o CouponState state default = 'CREATED'
