@@ -16,3 +16,15 @@ transaction DeleteCoupon {
   --> Coupon coupon
   --> Producer caller
 }
+
+transaction EditCoupon {
+  --> Coupon coupon
+  --> Producer caller
+  o String title optional
+  o Double price optional
+  o Double economicValue optional
+  o DateTime expirationTime optional
+  o DateTime[] dateConstraints optional
+  o String[] placeConstraints optional
+  --> Verifier[] verifiers optional
+}
