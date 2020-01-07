@@ -1,0 +1,40 @@
+namespace eu.sardcoin.assets
+
+import eu.sardcoin.participants.*
+
+
+enum CouponState {
+ o CREATED
+ o CANCELED
+ o AVAILABLE
+ o BOUGHT
+ o REDEEMED
+ o EXPIRED
+}
+
+
+
+/**
+* A Producer produces a Coupon
+*
+* CdU_2
+*/
+asset Coupon identified by couponId {
+  o String couponId
+  o String title
+  o Double price
+  o Double economicValue
+  o DateTime expirationDate optional
+  o DateTime[] dateConstraints optional
+  o String[] placeConstraints optional
+  o CouponState state default = 'CREATED'
+
+  // First, a producer creates a coupon
+  --> Producer producer
+
+  // Then a consumer buy it
+  --> Consumer consumer
+
+  // Finally, in order to be used, a coupon must be verified by one of the associated verifiers
+  --> Verifier[] verifiers optional
+}
