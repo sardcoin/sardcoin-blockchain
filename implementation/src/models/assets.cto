@@ -27,15 +27,14 @@ asset Coupon identified by couponId {
   o DateTime creationTime
   o DateTime expirationTime optional
   o DateTime[] dateConstraints optional
-  o String[] placeConstraints optional
   o CouponState state default = 'CREATED'
 
   // First, a producer creates a coupon
   --> Producer producer
 
   // Then a consumer buy it
-  --> Consumer consumer
+  --> Consumer consumer optional
 
   // Finally, in order to be used, a coupon must be verified by one of the associated verifiers
-  --> Verifier[] verifiers optional
+  --> Verifier[] verifiers
 }
