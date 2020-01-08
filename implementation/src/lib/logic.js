@@ -190,7 +190,7 @@ function fxRedemptionDeadlineExpired(tx){
  * @param {eu.sardcoin.transactions.CouponRedemptionRequest} tx The transaction instance.
  * @transaction
  * 
- * CdU_7
+ * CdU_7b
  */
 async function onCouponRedemptionRequest(tx){
 
@@ -222,4 +222,45 @@ function fxCouponRedemptionRequest(tx){
   tx.coupon.state = 'AWAITING';
 
   return tx;
+}
+
+
+
+/**
+ * A verifier either approves or denies the request to redeem a coupon
+ * @param {eu.sardcoin.transactions.CouponRedemptionApproval} tx The transaction instance.
+ * @transaction
+ * 
+ * CdU_7b
+ */
+async function onCouponRedemptionApproval(tx){
+
+  result = fxCouponRedemptionApproval(tx);
+
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(result.coupon);
+}
+
+function fxCouponRedemptionApproval(tx){
+  // The coupon must be in the AWAITING state
+  if(tx.coupon.state !== 'AWAITING'){
+    throw new Error('Only awaiting coupons can be approved (or denied)');
+  }
+
+  // The caller must be one of the verifiers of the coupon
+  for(i=0; i<tx.coupon.verifiers.length; i++){
+    
+    if(tx.coupon.verifiers[i] === tx.caller){
+      // The coupon is now redeemed
+      if(tx.result)
+        tx.coupon.state = 'REDEEMED';
+      else
+        tx.coupon.state = 'BOUGHT';
+
+      return tx;
+    }
+  }
+
+  throw new Error('Only one of the verifiers associated to the coupon is authorized to redeem it');
 }
