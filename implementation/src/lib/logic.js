@@ -1,5 +1,5 @@
 /**
- * The deadline for editing a coupon is expired, the coupon is now available.
+ * The deadline for editing a coupon is expired, the coupon is now available
  * @param {eu.sardcoin.transactions.PublishCoupon} tx The transaction instance.
  * @transaction
  * 
@@ -31,7 +31,7 @@ function fxPublishCoupon(tx){
 
 
 /**
- * A producer deletes a coupon.
+ * A producer deletes a coupon
  * @param {eu.sardcoin.transactions.DeleteCoupon} tx The transaction instance.
  * @transaction
  * 
@@ -67,7 +67,7 @@ function fxDeleteCoupon(tx){
 
 
 /**
- * A producer edits a coupon.
+ * A producer edits a coupon
  * @param {eu.sardcoin.transactions.EditCoupon} tx The transaction instance.
  * @transaction
  * 
@@ -122,7 +122,7 @@ function fxEditCoupon(tx){
 
 
 /**
- * A consumer buys a coupon.
+ * A consumer buys a coupon
  * @param {eu.sardcoin.transactions.BuyCoupon} tx The transaction instance.
  * @transaction
  * 
@@ -154,7 +154,39 @@ function fxBuyCoupon(tx){
 
 
 /**
- * A consumer request to redeem a coupon.
+ * The deadline for redeeming a coupon is expired
+ * @param {eu.sardcoin.transactions.RedemptionDeadlineExpired} tx The transaction instance.
+ * @transaction
+ * 
+ * CdU_7a
+ */
+async function onRedemptionDeadlineExpired(tx){
+
+  result = fxRedemptionDeadlineExpired(tx);
+
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(result.coupon);
+}
+
+function fxRedemptionDeadlineExpired(tx){
+  // Only coupons neither expired nor canceled can expire
+  if((tx.coupon.state === 'CANCELED') || (tx.coupon.state === 'EXPIRED')){
+    throw new Error('Only coupons neither expired nor canceled can expire');
+  }
+
+  // The coupon must be expired
+  if(tx.timestamp < tx.coupon.expirationTime){
+    throw new Error('Redemption deadline not expired yet');
+  }
+
+  tx.coupon.state = 'EXPIRED';
+}
+
+
+
+/**
+ * A consumer request to redeem a coupon
  * @param {eu.sardcoin.transactions.CouponRedemptionRequest} tx The transaction instance.
  * @transaction
  * 
@@ -184,7 +216,6 @@ function fxCouponRedemptionRequest(tx){
   // The deadline for redeeming the coupon must not be expired yet
   if((tx.coupon.expirationTime !== null) && (tx.timestamp > tx.coupon.expirationTime)){
     throw new Error('The deadline for redeeming the coupon is expired');
-    // TODO: update coupon state to expired
   }
 
   // The coupon is now awaiting
