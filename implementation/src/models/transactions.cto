@@ -27,3 +27,8 @@ transaction EditCoupon {
   o DateTime[] dateConstraints optional
   --> Verifier[] verifiers optional
 }
+
+transaction BuyCoupon {
+  --> Coupon coupon
+  --> Consumer caller
+}
