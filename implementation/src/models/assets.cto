@@ -8,6 +8,7 @@ enum CouponState {
  o CANCELED
  o AVAILABLE
  o BOUGHT
+ o AWAITING
  o REDEEMED
  o EXPIRED
 }

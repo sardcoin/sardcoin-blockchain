@@ -32,3 +32,13 @@ transaction BuyCoupon {
   --> Coupon coupon
   --> Consumer caller
 }
+
+transaction CouponRedemptionRequest {
+  --> Coupon coupon
+  --> Consumer consumer
+}
+
+transaction CouponRedemptionApproval {
+  --> Coupon coupon
+  --> Verifier verifier
+}
