@@ -25,6 +25,5 @@ transaction EditCoupon {
   o Double economicValue optional
   o DateTime expirationTime optional
   o DateTime[] dateConstraints optional
-  o String[] placeConstraints optional
   --> Verifier[] verifiers optional
 }
