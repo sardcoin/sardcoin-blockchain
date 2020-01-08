@@ -33,6 +33,10 @@ transaction BuyCoupon {
   --> Consumer caller
 }
 
+transaction RedemptionDeadlineExpired {
+  --> Coupon coupon
+}
+
 transaction CouponRedemptionRequest {
   --> Coupon coupon
   --> Consumer consumer
