@@ -39,10 +39,11 @@ transaction RedemptionDeadlineExpired {
 
 transaction CouponRedemptionRequest {
   --> Coupon coupon
-  --> Consumer consumer
+  --> Consumer caller
 }
 
 transaction CouponRedemptionApproval {
   --> Coupon coupon
-  --> Verifier verifier
+  --> Verifier caller
+  o Boolean result
 }
