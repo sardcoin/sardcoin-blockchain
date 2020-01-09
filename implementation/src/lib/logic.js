@@ -26,6 +26,8 @@ function fxPublishCoupon(tx){
   }
 
   tx.coupon.state = 'AVAILABLE';
+
+  return tx;
 }
 
 
@@ -95,25 +97,22 @@ function fxEditCoupon(tx){
   }
 
   // Replace old attributes with new values
-  if(tx.title !== null)
+  if(tx.title != null)
     tx.coupon.title = tx.title;
   
-  if(tx.price !== null)
+  if(tx.price != null)
     tx.coupon.price = tx.price;
 
-  if(tx.economicValue !== null)
+  if(tx.economicValue != null)
     tx.coupon.economicValue = tx.economicValue;
 
-  if(tx.expirationTime !== null)
+  if(tx.expirationTime != null)
     tx.coupon.expirationTime = tx.expirationTime;
 
-  if(tx.dateConstraints !== null)
+  if(tx.dateConstraints != null)
     tx.coupon.dateConstraints = tx.dateConstraints;
 
-  if(tx.placeConstraints !== null)
-    tx.coupon.placeConstraints = tx.placeConstraints;
-
-  if(tx.verifiers !== null)
+  if(tx.verifiers != null)
     tx.coupon.verifiers = tx.verifiers;
 
   return tx;
@@ -175,12 +174,19 @@ function fxRedemptionDeadlineExpired(tx){
     throw new Error('Only coupons neither expired nor canceled can expire');
   }
 
+  // There is no expiration deadline
+  if(tx.coupon.expirationTime == null){
+    throw new Error('There is no expiration deadline');
+  }
+
   // The coupon must be expired
   if(tx.timestamp < tx.coupon.expirationTime){
     throw new Error('Redemption deadline not expired yet');
   }
 
   tx.coupon.state = 'EXPIRED';
+
+  return tx;
 }
 
 
