@@ -3,7 +3,7 @@
  * @param {eu.sardcoin.transactions.PublishCoupon} tx The transaction instance.
  * @transaction
  * 
- * CdU_3a
+ * CdU_5
  */
 async function onPublishCoupon(tx){
   result = fxPublishCoupon(tx);
@@ -37,7 +37,7 @@ function fxPublishCoupon(tx){
  * @param {eu.sardcoin.transactions.DeleteCoupon} tx The transaction instance.
  * @transaction
  * 
- * CdU_3b
+ * CdU_6
  */
 async function onDeleteCoupon(tx){
 
@@ -73,7 +73,7 @@ function fxDeleteCoupon(tx){
  * @param {eu.sardcoin.transactions.EditCoupon} tx The transaction instance.
  * @transaction
  * 
- * CdU_3b
+ * CdU_6
  */
 async function onEditCoupon(tx){
 
@@ -125,7 +125,7 @@ function fxEditCoupon(tx){
  * @param {eu.sardcoin.transactions.BuyCoupon} tx The transaction instance.
  * @transaction
  * 
- * CdU_5
+ * CdU_8
  */
 async function onBuyCoupon(tx){
 
@@ -157,7 +157,7 @@ function fxBuyCoupon(tx){
  * @param {eu.sardcoin.transactions.RedemptionDeadlineExpired} tx The transaction instance.
  * @transaction
  * 
- * CdU_7a
+ * CdU_10
  */
 async function onRedemptionDeadlineExpired(tx){
 
@@ -196,7 +196,7 @@ function fxRedemptionDeadlineExpired(tx){
  * @param {eu.sardcoin.transactions.CouponRedemptionRequest} tx The transaction instance.
  * @transaction
  * 
- * CdU_7b
+ * CdU_11
  */
 async function onCouponRedemptionRequest(tx){
 
@@ -237,7 +237,7 @@ function fxCouponRedemptionRequest(tx){
  * @param {eu.sardcoin.transactions.CouponRedemptionApproval} tx The transaction instance.
  * @transaction
  * 
- * CdU_7b
+ * CdU_11
  */
 async function onCouponRedemptionApproval(tx){
 

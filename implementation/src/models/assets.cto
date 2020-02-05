@@ -18,7 +18,7 @@ enum CouponState {
 /**
 * A Producer produces a Coupon
 *
-* CdU_2
+* CdU_4
 */
 asset Coupon identified by couponId {
   o String couponId
