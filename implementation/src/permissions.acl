@@ -1,39 +1,3 @@
-/**
- * Sample access control list.
- */
-rule EverybodyCanReadEverything {
-    description: "Allow all participants read access to all resources"
-    participant: "ANY"
-    operation: READ
-    resource: "**"
-    action: ALLOW
-}
-
-rule EverybodyCanSubmitTransactions {
-    description: "Allow all participants to submit transactions"
-    participant: "ANY"
-    operation: CREATE
-    resource: "**"
-    action: ALLOW
-}
-
-rule OwnerHasFullAccessToTheirAssets {
-    description: "Allow all participants full access to their assets"
-    participant(p): "ANY"
-    operation: ALL
-    resource(r): "**"
-    condition: (r.owner.getIdentifier() === p.getIdentifier())
-    action: ALLOW
-}
-
-rule SystemACL {
-    description: "System ACL to permit all access"
-    participant: "org.hyperledger.composer.system.Participant"
-    operation: ALL
-    resource: "org.hyperledger.composer.system.**"
-    action: ALLOW
-}
-
 rule NetworkAdminUser {
     description: "Grant business network administrators full access to user resources"
     participant: "org.hyperledger.composer.system.NetworkAdmin"
@@ -48,4 +12,28 @@ rule NetworkAdminSystem {
     operation: ALL
     resource: "org.hyperledger.composer.system.**"
     action: ALLOW
+}
+
+rule AllAccess {
+  description: "AllAccess - grant everything to everybody"
+  participant: "org.hyperledger.composer.system.Participant"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW
+}
+
+rule AssetAccess {
+  description: "AllAccess - grant everything to everybody"
+  participant: "eu.sardcoin.participants.*"
+  operation: ALL
+  resource: "eu.sardcoin.assets.**"
+  action: ALLOW
+}
+
+rule TransactionAccess {
+  description: "AllAccess - grant everything to everybody"
+  participant: "eu.sardcoin.participants.*"
+  operation: ALL
+  resource: "eu.sardcoin.transactions.**"
+  action: ALLOW
 }
