@@ -6,14 +6,7 @@
  * CdU_5
  */
 async function onPublishCoupon(tx){
-  result = fxPublishCoupon(tx);
 
-  // Save the updated coupon
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(result.coupon);
-}
-
-function fxPublishCoupon(tx){
   // The coupon must be in the CREATED state
   if(tx.coupon.state !== 'CREATED'){
     throw new Error('Only CREATED coupons can be published');
@@ -27,7 +20,9 @@ function fxPublishCoupon(tx){
 
   tx.coupon.state = 'AVAILABLE';
 
-  return tx;
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(tx.coupon);
 }
 
 
@@ -41,14 +36,6 @@ function fxPublishCoupon(tx){
  */
 async function onDeleteCoupon(tx){
 
-  result = fxDeleteCoupon(tx);
-
-  // Save the updated coupon
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(result.coupon);
-}
-
-function fxDeleteCoupon(tx){
   // The caller must be the producer of the coupon
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the Producer of this coupon is authorized to delete it');
@@ -63,7 +50,9 @@ function fxDeleteCoupon(tx){
   // The coupon is now CANCELED
   tx.coupon.state = 'CANCELED';
 
-  return tx;
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(tx.coupon);
 }
 
 
@@ -77,14 +66,6 @@ function fxDeleteCoupon(tx){
  */
 async function onEditCoupon(tx){
 
-  result = fxEditCoupon(tx);
-
-  // Save the updated coupon
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(result.coupon);
-}
-
-function fxEditCoupon(tx){
   // The caller must be the producer of the coupon
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the Producer of this coupon is authorized to edit it');
@@ -115,7 +96,9 @@ function fxEditCoupon(tx){
   if(tx.verifiers != null)
     tx.coupon.verifiers = tx.verifiers;
 
-  return tx;
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(tx.coupon);
 }
 
 
@@ -129,15 +112,6 @@ function fxEditCoupon(tx){
  */
 async function onBuyCoupon(tx){
 
-  result = fxBuyCoupon(tx);
-
-  // Save the updated coupon
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(result.coupon);
-}
-
-function fxBuyCoupon(tx){
-
   // The coupon must be in the AVAILABLE state
   if(tx.coupon.state !== 'AVAILABLE'){
     throw new Error('Only available coupons can be bought');
@@ -147,7 +121,9 @@ function fxBuyCoupon(tx){
   tx.coupon.state = 'BOUGHT';
   tx.coupon.consumer = tx.getCurrentParticipant();
 
-  return tx;
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(tx.coupon);
 }
 
 
@@ -161,14 +137,6 @@ function fxBuyCoupon(tx){
  */
 async function onRedemptionDeadlineExpired(tx){
 
-  result = fxRedemptionDeadlineExpired(tx);
-
-  // Save the updated coupon
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(result.coupon);
-}
-
-function fxRedemptionDeadlineExpired(tx){
   // Only coupons neither expired nor canceled can expire
   if((tx.coupon.state === 'CANCELED') || (tx.coupon.state === 'EXPIRED')){
     throw new Error('Only coupons neither expired nor canceled can expire');
@@ -186,7 +154,9 @@ function fxRedemptionDeadlineExpired(tx){
 
   tx.coupon.state = 'EXPIRED';
 
-  return tx;
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(tx.coupon);
 }
 
 
@@ -199,15 +169,6 @@ function fxRedemptionDeadlineExpired(tx){
  * CdU_11
  */
 async function onCouponRedemptionRequest(tx){
-
-  result = fxCouponRedemptionRequest(tx);
-
-  // Save the updated coupon
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(result.coupon);
-}
-
-function fxCouponRedemptionRequest(tx){
 
   // The caller must be the consumer of the coupon
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.consumer.getFullyQualifiedIdentifier()) {
@@ -227,7 +188,9 @@ function fxCouponRedemptionRequest(tx){
   // The coupon is now awaiting
   tx.coupon.state = 'AWAITING';
 
-  return tx;
+  // Save the updated coupon
+  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+  await a.update(tx.coupon);
 }
 
 
@@ -241,21 +204,15 @@ function fxCouponRedemptionRequest(tx){
  */
 async function onCouponRedemptionApproval(tx){
 
-  result = fxCouponRedemptionApproval(tx);
-
-  // Save the updated coupon
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(result.coupon);
-}
-
-function fxCouponRedemptionApproval(tx){
   // The coupon must be in the AWAITING state
   if(tx.coupon.state !== 'AWAITING'){
     throw new Error('Only awaiting coupons can be approved (or denied)');
   }
 
   // The caller must be one of the verifiers of the coupon
-  for(i=0; i<tx.coupon.verifiers.length; i++){
+  i=0;
+  found = false;
+  do{
 
     if(tx.coupon.verifiers[i].getFullyQualifiedIdentifier() === tx.getCurrentParticipant().getFullyQualifiedIdentifier()){
       // The coupon is now redeemed
@@ -264,9 +221,17 @@ function fxCouponRedemptionApproval(tx){
       else
         tx.coupon.state = 'BOUGHT';
 
-      return tx;
-    }
-  }
+      found = true;
 
-  throw new Error('Only one of the verifiers associated to the coupon is authorized to redeem it');
+      // Save the updated coupon
+      const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+      await a.update(tx.coupon);
+    }
+
+    i++;
+
+  } while((i<tx.coupon.verifiers.length) && (found == false));
+
+  if(found == false)
+    throw new Error('Only one of the verifiers associated to the coupon are authorized to redeem it');
 }
