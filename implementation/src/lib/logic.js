@@ -50,7 +50,7 @@ async function onDeleteCoupon(tx){
 
 function fxDeleteCoupon(tx){
   // The caller must be the producer of the coupon
-  if(tx.caller !== tx.coupon.producer){
+  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the Producer of this coupon is authorized to delete it');
   }
 
@@ -86,7 +86,7 @@ async function onEditCoupon(tx){
 
 function fxEditCoupon(tx){
   // The caller must be the producer of the coupon
-  if(tx.caller !== tx.coupon.producer){
+  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the Producer of this coupon is authorized to edit it');
   }
 
@@ -145,7 +145,7 @@ function fxBuyCoupon(tx){
 
   // The coupon is now bought
   tx.coupon.state = 'BOUGHT';
-  tx.coupon.consumer = tx.caller;
+  tx.coupon.consumer = tx.getCurrentParticipant();
 
   return tx;
 }
@@ -210,7 +210,7 @@ async function onCouponRedemptionRequest(tx){
 function fxCouponRedemptionRequest(tx){
 
   // The caller must be the consumer of the coupon
-  if(tx.caller !== tx.coupon.consumer){
+  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.consumer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the consumer that bought this coupon is authorized to redeem it');
   }
 
@@ -256,8 +256,8 @@ function fxCouponRedemptionApproval(tx){
 
   // The caller must be one of the verifiers of the coupon
   for(i=0; i<tx.coupon.verifiers.length; i++){
-    
-    if(tx.coupon.verifiers[i] === tx.caller){
+
+    if(tx.coupon.verifiers[i].getFullyQualifiedIdentifier() === tx.getCurrentParticipant().getFullyQualifiedIdentifier()){
       // The coupon is now redeemed
       if(tx.result)
         tx.coupon.state = 'REDEEMED';

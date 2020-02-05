@@ -14,12 +14,10 @@ transaction PublishCoupon {
 
 transaction DeleteCoupon {
   --> Coupon coupon
-  --> Producer caller
 }
 
 transaction EditCoupon {
   --> Coupon coupon
-  --> Producer caller
   o String title optional
   o Double price optional
   o Double economicValue optional
@@ -30,7 +28,6 @@ transaction EditCoupon {
 
 transaction BuyCoupon {
   --> Coupon coupon
-  --> Consumer caller
 }
 
 transaction RedemptionDeadlineExpired {
@@ -39,11 +36,9 @@ transaction RedemptionDeadlineExpired {
 
 transaction CouponRedemptionRequest {
   --> Coupon coupon
-  --> Consumer caller
 }
 
 transaction CouponRedemptionApproval {
   --> Coupon coupon
-  --> Verifier caller
   o Boolean result
 }
