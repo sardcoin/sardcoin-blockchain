@@ -119,7 +119,7 @@ async function onBuyCoupon(tx){
 
   // The coupon is now bought
   tx.coupon.state = 'BOUGHT';
-  tx.coupon.consumer = tx.getCurrentParticipant();
+  tx.coupon.consumer = getCurrentParticipant();
 
   // Save the updated coupon
   const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
@@ -214,7 +214,7 @@ async function onCouponRedemptionApproval(tx){
   found = false;
   do{
 
-    if(tx.coupon.verifiers[i].getFullyQualifiedIdentifier() === tx.getCurrentParticipant().getFullyQualifiedIdentifier()){
+    if(tx.coupon.verifiers[i].getFullyQualifiedIdentifier() === getCurrentParticipant().getFullyQualifiedIdentifier()){
       // The coupon is now redeemed
       if(tx.result)
         tx.coupon.state = 'REDEEMED';
