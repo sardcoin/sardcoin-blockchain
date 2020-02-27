@@ -7,17 +7,21 @@ import eu.sardcoin.participants.*
 import eu.sardcoin.assets.*
 
 
-
-transaction PublishCoupon {
-  --> Coupon coupon
+transaction CreateCoupons {
+  --> Campaign campaign
+  o String[] tokens
 }
 
-transaction DeleteCoupon {
-  --> Coupon coupon
+transaction PublishCampaign {
+  --> Campaign campaign
 }
 
-transaction EditCoupon {
-  --> Coupon coupon
+transaction DeleteCampaign {
+  --> Campaign campaign
+}
+
+transaction EditCampaign {
+  --> Campaign campaign
   o String title optional
   o Double price optional
   o Double economicValue optional

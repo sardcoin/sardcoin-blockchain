@@ -1,40 +1,93 @@
 /**
- * The deadline for editing a coupon is expired, the coupon is now available
- * @param {eu.sardcoin.transactions.PublishCoupon} tx The transaction instance.
+ * ...
+ * @param {eu.sardcoin.transactions.CreateCoupons} tx The transaction instance.
+ * @transaction
+ * 
+ * CdU_***
+ */
+async function onCreateCoupons(tx){
+  
+  // The campaign must be in the CREATED state
+  if(tx.campaign.state !== 'CREATED'){
+    throw new Error('Only CREATED campaign can be create coupons');
+  }
+
+  // The campaign must be created less than 24h ago
+  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
+  if(tx.timestamp >= editDeadline){
+    throw new Error('The deadline for creating campaign coupons is expired');
+  }
+
+  const factory = getFactory();
+  const AP = 'eu.sardcoin.assets';
+  const couponsRegistry = await getAssetRegistry(AP + '.Coupon');
+  const campaignRegistry = await getAssetRegistry(AP + '.Campaign');
+
+  // Create coupons
+  coupons = []
+  for(i=0; i<tx.tokens.length; i++){
+    coupon = factory.newResource(AP, 'Coupon', tx.tokens[i]);
+    coupon.state = 'CREATED';
+    coupon.campaign = factory.newRelationship(AP, 'Campaign', tx.campaign.campaignId);
+    coupons.push(coupon);
+  }
+  
+  // Update coupons registry
+  await couponsRegistry.addAll(coupons);
+
+  // Update campaign registry
+  tx.campaign.coupons = coupons;
+  tx.campaign.state = 'INITIALIZED';
+  campaignRegistry.update(tx.campaign);
+}
+
+
+
+/**
+ * The deadline for editing a campaign is expired, the campaign is now available
+ * @param {eu.sardcoin.transactions.PublishCampaign} tx The transaction instance.
  * @transaction
  * 
  * CdU_5
  */
-async function onPublishCoupon(tx){
+async function onPublishCampaign(tx){
 
-  // The coupon must be in the CREATED state
-  if(tx.coupon.state !== 'CREATED'){
-    throw new Error('Only CREATED coupons can be published');
+  // The campaign must be in the INITIALIZED state
+  if(tx.campaign.state !== 'INITIALIZED'){
+    throw new Error('Only INITIALIZED campaigns can be published');
   }
 
-  // The coupon must be created more than 24h ago
-  var editDeadline = new Date(tx.coupon.creationTime.getTime() + (60*60*1000*24));
+  // The campaign must be created more than 24h ago
+  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
   if(tx.timestamp < editDeadline){
     throw new Error('Edit deadline not expired yet');
   }
 
-  tx.coupon.state = 'AVAILABLE';
+  tx.campaign.state = 'AVAILABLE';
 
-  // Save the updated coupon
+  for(i=0; i<tx.campaign.coupons.length; i++){
+    tx.campaign.coupons[i].state = 'AVAILABLE';
+  }
+
+  // Save the updated coupons
   const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(tx.coupon);
+  await a.updateAll(tx.campaign.coupons);
+
+  // Save the updated campaign
+  const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
+  await b.update(tx.campaign);
 }
 
 
 
 /**
  * A producer deletes a coupon
- * @param {eu.sardcoin.transactions.DeleteCoupon} tx The transaction instance.
+ * @param {eu.sardcoin.transactions.DeleteCampaign} tx The transaction instance.
  * @transaction
  * 
  * CdU_6
  */
-async function onDeleteCoupon(tx){
+async function onDeleteCampaign(tx){
 
   // The caller must be the producer of the coupon
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
@@ -64,7 +117,7 @@ async function onDeleteCoupon(tx){
  * 
  * CdU_6
  */
-async function onEditCoupon(tx){
+async function onEditCampaign(tx){
 
   // The caller must be the producer of the coupon
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
