@@ -5,8 +5,8 @@ import eu.sardcoin.participants.*
 
 enum CampaignState {
  o CREATED
- o INITIALIZED
  o CANCELED
+ o INITIALIZED
  o AVAILABLE
 }
 

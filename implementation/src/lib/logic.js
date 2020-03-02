@@ -1,12 +1,17 @@
 /**
- * ...
- * @param {eu.sardcoin.transactions.CreateCoupons} tx The transaction instance.
+ * Initialize a campaign by adding coupons
+ * @param {eu.sardcoin.transactions.AddCoupons} tx The transaction instance.
  * @transaction
  * 
  * CdU_***
  */
-async function onCreateCoupons(tx){
-  
+async function onAddCoupons(tx){
+
+  // The caller must be the producer of the campaign
+  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
+    throw new Error('Only the Producer of this campaign is authorized to add coupons to it');
+  }
+
   // The campaign must be in the CREATED state
   if(tx.campaign.state !== 'CREATED'){
     throw new Error('Only CREATED campaign can be create coupons');
@@ -81,7 +86,7 @@ async function onPublishCampaign(tx){
 
 
 /**
- * A producer deletes a coupon
+ * A producer deletes a campaign
  * @param {eu.sardcoin.transactions.DeleteCampaign} tx The transaction instance.
  * @transaction
  * 
@@ -89,69 +94,83 @@ async function onPublishCampaign(tx){
  */
 async function onDeleteCampaign(tx){
 
-  // The caller must be the producer of the coupon
-  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
-    throw new Error('Only the Producer of this coupon is authorized to delete it');
+  // The caller must be the producer of the campaign
+  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
+    throw new Error('Only the Producer of this campaign is authorized to delete it');
   }
 
-  // The coupon must be in the CREATED state and the must be created less than 24h ago
-  var editDeadline = new Date(tx.coupon.creationTime.getTime() + (60*60*1000*24));
-  if((tx.timestamp > editDeadline) || (tx.coupon.state !== 'CREATED')){
+  // The campaign must be in the CREATED state and must be created less than 24h ago
+  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
+  if((tx.timestamp > editDeadline) || (tx.campaign.state !== 'CREATED')){
     throw new Error('Delete deadline expired');
   }
 
-  // The coupon is now CANCELED
-  tx.coupon.state = 'CANCELED';
+  // The campaign is now CANCELED
+  tx.campaign.state = 'CANCELED';
 
-  // Save the updated coupon
+  for(i=0; i<tx.campaign.coupons.length; i++){
+    tx.campaign.coupons[i].state = 'CANCELED';
+  }
+
+  // Save the updated coupons
   const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(tx.coupon);
+  await a.updateAll(tx.campaign.coupons);
+
+  // Save the updated campaign
+  const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
+  await b.update(tx.campaign);
 }
 
 
 
 /**
- * A producer edits a coupon
- * @param {eu.sardcoin.transactions.EditCoupon} tx The transaction instance.
+ * A producer edits a campaign
+ * @param {eu.sardcoin.transactions.EditCampaign} tx The transaction instance.
  * @transaction
  * 
  * CdU_6
  */
 async function onEditCampaign(tx){
 
-  // The caller must be the producer of the coupon
-  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.producer.getFullyQualifiedIdentifier()) {
-    throw new Error('Only the Producer of this coupon is authorized to edit it');
+  // The caller must be the producer of the campaign
+  if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
+    throw new Error('Only the Producer of this campaign is authorized to edit it');
   }
 
-  // The coupon must be in the CREATED state and the must be created less than 24h ago
-  var editDeadline = new Date(tx.coupon.creationTime.getTime() + (60*60*1000*24));
-  if((tx.timestamp > editDeadline) || (tx.coupon.state !== 'CREATED')){
-    throw new Error('Edit deadline expired');
+  // The campaign must be in the CREATED state and must be created less than 24h ago
+  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
+  if((tx.timestamp > editDeadline) || (tx.campaign.state !== 'CREATED')){
+    throw new Error('Delete deadline expired');
   }
 
   // Replace old attributes with new values
-  if(tx.title != null)
-    tx.coupon.title = tx.title;
-  
-  if(tx.price != null)
-    tx.coupon.price = tx.price;
+  for(i=0; i<tx.campaign.coupons.length; i++){
+    if(tx.title != null)
+      tx.campaign.coupons[i].title = tx.title;
+    
+    if(tx.price != null)
+      tx.campaign.coupons[i].price = tx.price;
 
-  if(tx.economicValue != null)
-    tx.coupon.economicValue = tx.economicValue;
+    if(tx.economicValue != null)
+      tx.campaign.coupons[i].economicValue = tx.economicValue;
 
-  if(tx.expirationTime != null)
-    tx.coupon.expirationTime = tx.expirationTime;
+    if(tx.expirationTime != null)
+      tx.campaign.coupons[i].expirationTime = tx.expirationTime;
 
-  if(tx.dateConstraints != null)
-    tx.coupon.dateConstraints = tx.dateConstraints;
+    if(tx.dateConstraints != null)
+      tx.campaign.coupons[i].dateConstraints = tx.dateConstraints;
 
-  if(tx.verifiers != null)
-    tx.coupon.verifiers = tx.verifiers;
+    if(tx.verifiers != null)
+      tx.campaign.coupons[i].verifiers = tx.verifiers;
+  }
 
-  // Save the updated coupon
+  // Save the updated coupons
   const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.update(tx.coupon);
+  await a.updateAll(tx.campaign.coupons);
+
+  // Save the updated campaign
+  const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
+  await b.update(tx.campaign);
 }
 
 

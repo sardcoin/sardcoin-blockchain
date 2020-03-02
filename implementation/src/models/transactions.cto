@@ -7,7 +7,7 @@ import eu.sardcoin.participants.*
 import eu.sardcoin.assets.*
 
 
-transaction CreateCoupons {
+transaction AddCoupons {
   --> Campaign campaign
   o String[] tokens
 }
