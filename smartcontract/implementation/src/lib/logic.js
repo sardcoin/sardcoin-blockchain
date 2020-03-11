@@ -101,15 +101,17 @@ async function onDeleteCampaign(tx){
 */
   // The campaign must be in the CREATED state and must be created less than 24h ago
   var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
-  if((tx.timestamp > editDeadline) || (tx.campaign.state !== 'CREATED')){
+  if((tx.timestamp > editDeadline) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
     throw new Error('Delete deadline expired');
   }
 
   // The campaign is now CANCELED
   tx.campaign.state = 'CANCELED';
 
-  for(i=0; i<tx.campaign.coupons.length; i++){
-    tx.campaign.coupons[i].state = 'CANCELED';
+  if(tx.campaign.coupons.length > 0){
+    for(i=0; i<tx.campaign.coupons.length; i++){
+      tx.campaign.coupons[i].state = 'CANCELED';
+    }
   }
 
   // Save the updated coupons
@@ -139,35 +141,37 @@ async function onEditCampaign(tx){
 */
   // The campaign must be in the CREATED state and must be created less than 24h ago
   var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
-  if((tx.timestamp > editDeadline) || (tx.campaign.state !== 'CREATED')){
-    throw new Error('Delete deadline expired');
+  if((tx.timestamp > editDeadline) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
+    throw new Error('Edit deadline expired');
   }
 
   // Replace old attributes with new values
-  for(i=0; i<tx.campaign.coupons.length; i++){
-    if(tx.title != null)
-      tx.campaign.coupons[i].title = tx.title;
-    
-    if(tx.price != null)
-      tx.campaign.coupons[i].price = tx.price;
+  if(tx.campaign.coupons.length > 0){
+    for(i=0; i<tx.campaign.coupons.length; i++){
+      if(tx.title != null)
+        tx.campaign.coupons[i].title = tx.title;
+      
+      if(tx.price != null)
+        tx.campaign.coupons[i].price = tx.price;
 
-    if(tx.economicValue != null)
-      tx.campaign.coupons[i].economicValue = tx.economicValue;
+      if(tx.economicValue != null)
+        tx.campaign.coupons[i].economicValue = tx.economicValue;
 
-    if(tx.expirationTime != null)
-      tx.campaign.coupons[i].expirationTime = tx.expirationTime;
+      if(tx.expirationTime != null)
+        tx.campaign.coupons[i].expirationTime = tx.expirationTime;
 
-    if(tx.dateConstraints != null)
-      tx.campaign.coupons[i].dateConstraints = tx.dateConstraints;
+      if(tx.dateConstraints != null)
+        tx.campaign.coupons[i].dateConstraints = tx.dateConstraints;
 
-    if(tx.verifiers != null)
-      tx.campaign.coupons[i].verifiers = tx.verifiers;
+      if(tx.verifiers != null)
+        tx.campaign.coupons[i].verifiers = tx.verifiers;
+    }
+
+    // Save the updated coupons
+    const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+    await a.updateAll(tx.campaign.coupons);
   }
-
-  // Save the updated coupons
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.updateAll(tx.campaign.coupons);
-
+  
   // Save the updated campaign
   const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
   await b.update(tx.campaign);
