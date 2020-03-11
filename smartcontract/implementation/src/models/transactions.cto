@@ -32,6 +32,7 @@ transaction EditCampaign {
 
 transaction BuyCoupon {
   --> Coupon coupon
+  --> Consumer caller
 }
 
 transaction RedemptionDeadlineExpired {

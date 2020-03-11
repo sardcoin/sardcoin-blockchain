@@ -6,12 +6,12 @@
  * CdU_***
  */
 async function onAddCoupons(tx){
-
+/*
   // The caller must be the producer of the campaign
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the Producer of this campaign is authorized to add coupons to it');
   }
-
+*/
   // The campaign must be in the CREATED state
   if(tx.campaign.state !== 'CREATED'){
     throw new Error('Only CREATED campaign can be create coupons');
@@ -93,12 +93,12 @@ async function onPublishCampaign(tx){
  * CdU_6
  */
 async function onDeleteCampaign(tx){
-
+/*
   // The caller must be the producer of the campaign
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the Producer of this campaign is authorized to delete it');
   }
-
+*/
   // The campaign must be in the CREATED state and must be created less than 24h ago
   var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
   if((tx.timestamp > editDeadline) || (tx.campaign.state !== 'CREATED')){
@@ -131,12 +131,12 @@ async function onDeleteCampaign(tx){
  * CdU_6
  */
 async function onEditCampaign(tx){
-
+/*
   // The caller must be the producer of the campaign
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the Producer of this campaign is authorized to edit it');
   }
-
+*/
   // The campaign must be in the CREATED state and must be created less than 24h ago
   var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
   if((tx.timestamp > editDeadline) || (tx.campaign.state !== 'CREATED')){
@@ -191,7 +191,8 @@ async function onBuyCoupon(tx){
 
   // The coupon is now bought
   tx.coupon.state = 'BOUGHT';
-  tx.coupon.consumer = getCurrentParticipant();
+/*  tx.coupon.consumer = getCurrentParticipant(); */
+  tx.coupon.consumer = tx.caller;
 
   // Save the updated coupon
   const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
@@ -241,12 +242,12 @@ async function onRedemptionDeadlineExpired(tx){
  * CdU_11
  */
 async function onCouponRedemptionRequest(tx){
-
+/*
   // The caller must be the consumer of the coupon
   if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.coupon.consumer.getFullyQualifiedIdentifier()) {
     throw new Error('Only the consumer that bought this coupon is authorized to redeem it');
   }
-
+*/
   // The coupon must be in the BOUGHT state
   if(tx.coupon.state !== 'BOUGHT'){
     throw new Error('Only bought coupons can be redempt');
@@ -280,7 +281,7 @@ async function onCouponRedemptionApproval(tx){
   if(tx.coupon.state !== 'AWAITING'){
     throw new Error('Only awaiting coupons can be approved (or denied)');
   }
-
+/*
   // The caller must be one of the verifiers of the coupon
   i=0;
   found = false;
@@ -294,11 +295,11 @@ async function onCouponRedemptionApproval(tx){
         tx.coupon.state = 'BOUGHT';
 
       found = true;
-
+*/
       // Save the updated coupon
       const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
       await a.update(tx.coupon);
-    }
+/*    }
 
     i++;
 
@@ -306,4 +307,4 @@ async function onCouponRedemptionApproval(tx){
 
   if(found == false)
     throw new Error('Only one of the verifiers associated to the coupon are authorized to redeem it');
-}
+*/}
