@@ -1,0 +1,48 @@
+/** 
+ * See lib/logic.js for a complete description of the behaviour of each transaction.
+ */
+namespace eu.sardcoin.transactions
+
+import eu.sardcoin.participants.*
+import eu.sardcoin.assets.*
+
+
+transaction AddCoupons {
+  --> Campaign campaign
+  o String[] tokens
+}
+
+transaction PublishCampaign {
+  --> Campaign campaign
+}
+
+transaction DeleteCampaign {
+  --> Campaign campaign
+}
+
+transaction EditCampaign {
+  --> Campaign campaign
+  o String title optional
+  o Double price optional
+  o Double economicValue optional
+  o DateTime expirationTime optional
+  o DateTime[] dateConstraints optional
+  --> Verifier[] verifiers optional
+}
+
+transaction BuyCoupon {
+  --> Coupon coupon
+}
+
+transaction RedemptionDeadlineExpired {
+  --> Coupon coupon
+}
+
+transaction CouponRedemptionRequest {
+  --> Coupon coupon
+}
+
+transaction CouponRedemptionApproval {
+  --> Coupon coupon
+  o Boolean result
+}

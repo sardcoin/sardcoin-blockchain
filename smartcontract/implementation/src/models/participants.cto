@@ -1,0 +1,39 @@
+namespace eu.sardcoin.participants
+
+
+
+participant Producer identified by id {
+  o String id
+  --> Person p
+}
+
+
+participant Consumer identified by id{
+  o String id
+  --> Person p
+}
+
+
+participant Verifier identified by id{
+  o String id
+  --> Person p
+}
+
+
+participant Broker identified by id{
+  o String id
+  --> Person p
+}
+
+
+participant Administrator identified by id{
+  o String id
+  --> Person p
+}
+
+
+
+participant Person identified by id {
+  o String id
+  o Integer reputation default = 10000
+}
