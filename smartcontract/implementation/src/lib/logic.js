@@ -108,7 +108,7 @@ async function onDeleteCampaign(tx){
   // The campaign is now CANCELED
   tx.campaign.state = 'CANCELED';
 
-  if(tx.campaign.coupons !== null){
+  if(tx.campaign.coupons != null){
     for(i=0; i<tx.campaign.coupons.length; i++){
       tx.campaign.coupons[i].state = 'CANCELED';
     }
@@ -146,7 +146,7 @@ async function onEditCampaign(tx){
   }
 
   // Replace old attributes with new values
-  if(tx.campaign.coupons !== null){
+  if(tx.campaign.coupons != null){
     for(i=0; i<tx.campaign.coupons.length; i++){
       if(tx.title != null)
         tx.campaign.coupons[i].title = tx.title;
@@ -258,7 +258,7 @@ async function onCouponRedemptionRequest(tx){
   }
 
   // The deadline for redeeming the coupon must not be expired yet
-  if((tx.coupon.expirationTime !== null) && (tx.timestamp > tx.coupon.expirationTime)){
+  if((tx.coupon.expirationTime != null) && (tx.timestamp > tx.coupon.expirationTime)){
     throw new Error('The deadline for redeeming the coupon is expired');
   }
 
