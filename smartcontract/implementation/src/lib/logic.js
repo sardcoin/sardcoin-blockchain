@@ -108,7 +108,7 @@ async function onDeleteCampaign(tx){
   // The campaign is now CANCELED
   tx.campaign.state = 'CANCELED';
 
-  if(tx.campaign.coupons.length > 0){
+  if(tx.campaign.coupons !== null){
     for(i=0; i<tx.campaign.coupons.length; i++){
       tx.campaign.coupons[i].state = 'CANCELED';
     }
@@ -146,7 +146,7 @@ async function onEditCampaign(tx){
   }
 
   // Replace old attributes with new values
-  if(tx.campaign.coupons.length > 0){
+  if(tx.campaign.coupons !== null){
     for(i=0; i<tx.campaign.coupons.length; i++){
       if(tx.title != null)
         tx.campaign.coupons[i].title = tx.title;
@@ -171,7 +171,7 @@ async function onEditCampaign(tx){
     const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
     await a.updateAll(tx.campaign.coupons);
   }
-  
+
   // Save the updated campaign
   const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
   await b.update(tx.campaign);
