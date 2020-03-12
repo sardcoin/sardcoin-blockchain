@@ -68,19 +68,24 @@ async function onPublishCampaign(tx){
     throw new Error('Edit deadline not expired yet');
   }
 
-  tx.campaign.state = 'AVAILABLE';
+  if(typeof tx.campaign.coupons !== 'undefined' && tx.campaign.coupons.length > 0){
+    tx.campaign.state = 'AVAILABLE';
 
-  for(i=0; i<tx.campaign.coupons.length; i++){
-    tx.campaign.coupons[i].state = 'AVAILABLE';
+    for(i=0; i<tx.campaign.coupons.length; i++){
+      tx.campaign.coupons[i].state = 'AVAILABLE';
+    }
+
+    // Save the updated coupons
+    const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+    await a.updateAll(tx.campaign.coupons);
+
+    // Save the updated campaign
+    const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
+    await b.update(tx.campaign);
+
+  } else {
+    throw new Error('Campaign must contain at least one coupon in order to be published');
   }
-
-  // Save the updated coupons
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.updateAll(tx.campaign.coupons);
-
-  // Save the updated campaign
-  const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
-  await b.update(tx.campaign);
 }
 
 
@@ -108,15 +113,16 @@ async function onDeleteCampaign(tx){
   // The campaign is now CANCELED
   tx.campaign.state = 'CANCELED';
 
-  if((tx.campaign.coupons != null) && (tx.campaign.coupons.length>0)){
+  if(typeof tx.campaign.coupons !== 'undefined' && tx.campaign.coupons.length > 0){
     for(i=0; i<tx.campaign.coupons.length; i++){
       tx.campaign.coupons[i].state = 'CANCELED';
     }
+
+    // Save the updated coupons
+    const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
+    await a.updateAll(tx.campaign.coupons);
   }
 
-  // Save the updated coupons
-  const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-  await a.updateAll(tx.campaign.coupons);
 
   // Save the updated campaign
   const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
