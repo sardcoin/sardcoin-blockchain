@@ -315,3 +315,31 @@ async function onCouponRedemptionApproval(tx){
 function getDateWithDelay(time, delay){
   return new Date(time.getTime() + (60*60*1000*Math.abs(delay)));
 }
+
+
+
+/**
+ * Add verifiers to a campaign
+ * @param {eu.sardcoin.transactions.AddVerifiers} tx The transaction instance.
+ * @transaction
+ * 
+ * CdU_***
+ */
+async function onAddVerifiers(tx){
+  /*
+    // The caller must be the producer of the campaign
+    if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
+      throw new Error('Only the Producer of this campaign is authorized to add coupons to it');
+    }
+  */
+    const AP = 'eu.sardcoin.assets';
+    const campaignRegistry = await getAssetRegistry(AP + '.Campaign');
+  
+    // Add verifiers
+    for(i=0; i<tx.verifiers.length; i++){
+      tx.campaign.verifiers.push(tx.verifiers[i]);
+    }
+  
+    // Update campaign registry
+    campaignRegistry.update(tx.campaign);
+  }

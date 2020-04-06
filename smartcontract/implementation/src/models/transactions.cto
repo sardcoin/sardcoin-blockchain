@@ -47,3 +47,8 @@ transaction CouponRedemptionApproval {
   --> Coupon coupon
   o Boolean result
 }
+
+transaction AddVerifiers {
+  --> Campaign campaign
+  --> Verifier[] verifiers
+}
