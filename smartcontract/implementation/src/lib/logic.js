@@ -17,8 +17,8 @@ async function onAddCoupons(tx){
     throw new Error('Only CREATED campaign can be create coupons');
   }
 
-  // The campaign must be created less than 24h ago
-  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
+  // The campaign must be created less than "delay" hours ago
+  var editDeadline = getDateWithDelay(tx.campaign.creationTime, tx.campaign.delay);
   if(tx.timestamp >= editDeadline){
     throw new Error('The deadline for creating campaign coupons is expired');
   }
@@ -62,8 +62,8 @@ async function onPublishCampaign(tx){
     throw new Error('Only INITIALIZED campaigns can be published');
   }
 
-  // The campaign must be created more than 24h ago
-  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
+  // The campaign must be created less than "delay" hours ago
+  var editDeadline = getDateWithDelay(tx.campaign.creationTime, tx.campaign.delay);
   if(tx.timestamp < editDeadline){
     throw new Error('Edit deadline not expired yet');
   }
@@ -104,8 +104,9 @@ async function onDeleteCampaign(tx){
     throw new Error('Only the Producer of this campaign is authorized to delete it');
   }
 */
-  // The campaign must be in the CREATED state and must be created less than 24h ago
-  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
+
+  // The campaign must be in the CREATED state and must be created less "delay" hours ago
+  var editDeadline = getDateWithDelay(tx.campaign.creationTime, tx.campaign.delay);
   if((tx.timestamp > editDeadline) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
     throw new Error('Delete deadline expired');
   }
@@ -145,8 +146,8 @@ async function onEditCampaign(tx){
     throw new Error('Only the Producer of this campaign is authorized to edit it');
   }
 */
-  // The campaign must be in the CREATED state and must be created less than 24h ago
-  var editDeadline = new Date(tx.campaign.creationTime.getTime() + (60*60*1000*24));
+  // The campaign must be in the CREATED state and must be created less "delay" hours ago
+  var editDeadline = getDateWithDelay(tx.campaign.creationTime, tx.campaign.delay);
   if((tx.timestamp > editDeadline) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
     throw new Error('Edit deadline expired');
   }
@@ -310,3 +311,7 @@ async function onCouponRedemptionApproval(tx){
   if(found == false)
     throw new Error('Only one of the verifiers associated to the coupon are authorized to redeem it');
 */}
+
+function getDateWithDelay(time, delay){
+  return new Date(time.getTime() + (60*60*1000*Math.abs(delay)));
+}
