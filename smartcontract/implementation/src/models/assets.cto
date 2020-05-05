@@ -13,7 +13,6 @@ enum CampaignState {
 enum CouponState {
  o CREATED
  o CANCELED
- o AVAILABLE
  o BOUGHT
  o AWAITING
  o REDEEMED

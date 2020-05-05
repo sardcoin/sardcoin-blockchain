@@ -12,10 +12,6 @@ transaction AddCoupons {
   o String[] tokens
 }
 
-transaction PublishCampaign {
-  --> Campaign campaign
-}
-
 transaction DeleteCampaign {
   --> Campaign campaign
 }

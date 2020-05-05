@@ -14,12 +14,11 @@ async function onAddCoupons(tx){
   */
     // The campaign must be in the CREATED state
     if(tx.campaign.state !== 'CREATED'){
-      throw new Error('Only CREATED campaign can be create coupons');
+      throw new Error('Only CREATED campaign can receive new coupons');
     }
   
     // The campaign must be created less than "delay" hours ago
-    var editDeadline = getPublicationTimestamp(tx.campaign.creationTime, tx.campaign.delay);
-    if(tx.timestamp >= editDeadline){
+    if(isCampaignPublic(tx.campaign, tx.timestamp)){
       throw new Error('The deadline for creating campaign coupons is expired');
     }
   
@@ -49,48 +48,6 @@ async function onAddCoupons(tx){
   
   
   /**
-   * The deadline for editing a campaign is expired, the campaign is now available
-   * @param {eu.sardcoin.transactions.PublishCampaign} tx The transaction instance.
-   * @transaction
-   * 
-   * CdU_5
-   */
-  async function onPublishCampaign(tx){
-  
-    // The campaign must be in the INITIALIZED state
-    if(tx.campaign.state !== 'INITIALIZED'){
-      throw new Error('Only INITIALIZED campaigns can be published');
-    }
-  
-    // The campaign must be created less than "delay" hours ago
-    var editDeadline = getPublicationTimestamp(tx.campaign.creationTime, tx.campaign.delay);
-    if(tx.timestamp < editDeadline){
-      throw new Error('Edit deadline not expired yet');
-    }
-  
-    if(typeof tx.campaign.coupons !== 'undefined' && tx.campaign.coupons.length > 0){
-      tx.campaign.state = 'AVAILABLE';
-  
-      for(i=0; i<tx.campaign.coupons.length; i++){
-        tx.campaign.coupons[i].state = 'AVAILABLE';
-      }
-  
-      // Save the updated coupons
-      const a = await getAssetRegistry('eu.sardcoin.assets.Coupon');
-      await a.updateAll(tx.campaign.coupons);
-  
-      // Save the updated campaign
-      const b = await getAssetRegistry('eu.sardcoin.assets.Campaign');
-      await b.update(tx.campaign);
-  
-    } else {
-      throw new Error('Campaign must contain at least one coupon in order to be published');
-    }
-  }
-  
-  
-  
-  /**
    * A producer deletes a campaign
    * @param {eu.sardcoin.transactions.DeleteCampaign} tx The transaction instance.
    * @transaction
@@ -105,9 +62,8 @@ async function onAddCoupons(tx){
     }
   */
   
-    // The campaign must be in the CREATED state and must be created less "delay" hours ago
-    var editDeadline = getPublicationTimestamp(tx.campaign.creationTime, tx.campaign.delay);
-    if((tx.timestamp > editDeadline) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
+    // The campaign must be either in the CREATED or INITIALIZED state and must be created less "delay" hours ago
+    if(isCampaignPublic(tx.campaign, tx.timestamp) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
       throw new Error('Delete deadline expired');
     }
   
@@ -146,9 +102,8 @@ async function onAddCoupons(tx){
       throw new Error('Only the Producer of this campaign is authorized to edit it');
     }
   */
-    // The campaign must be in the CREATED state and must be created less "delay" hours ago
-    var editDeadline = getPublicationTimestamp(tx.campaign.creationTime, tx.campaign.delay);
-    if((tx.timestamp > editDeadline) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
+    // The campaign must be either in the CREATED or INITIALIZED state and must be created less "delay" hours ago
+    if(isCampaignPublic(tx.campaign, tx.timestamp) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
       throw new Error('Edit deadline expired');
     }
   
@@ -187,9 +142,14 @@ async function onAddCoupons(tx){
    */
   async function onBuyCoupon(tx){
   
-    // The coupon must be in the AVAILABLE state
-    if(tx.coupon.state !== 'AVAILABLE'){
-      throw new Error('Only available coupons can be bought');
+    // The campaign must be created more than "delay" hours ago
+    if(!isCampaignPublic(tx.coupon.campaign, tx.timestamp)){
+      throw new Error('Only coupons of a published campaign can be bought')
+    }
+    
+    // The coupon must be in the CREATED state
+    if(tx.coupon.state !== 'CREATED'){
+      throw new Error('Only created coupons can be bought');
     }
   
     // The coupon is now bought
@@ -339,22 +299,23 @@ async function onAddCoupons(tx){
       // Update campaign registry
       campaignRegistry.update(tx.campaign);
     }
-  
-  
+
+
+
   /**
-   * Given the creation time of a campaign and its number of hours of delay
-   * for the publication, this function evaluates the timestamp of publication.
+   * Given a campaign (within its creation time and hours of delay), and 
+   * the timestamp of the current transaction, this function calculates the timestamp
+   * of publication and evaluates if the campaign has already been published or not.
    */
-  function getPublicationTimestamp(creationTime, delay){
-    
+  function isCampaignPublic(campaign, timestamp){
+
     // If the number of hours of delay is zero, give 6 minutes of delay 
     // for creating and publishing the addCoupons transaction 
-    if(delay == 0){
+    if(campaign.delay == 0){
       hours = 0.1;
     } else { 
-      hours = delay;
+      hours = campaign.delay;
     }
     
-    return new Date(creationTime.getTime() + (60*60*1000*Math.abs(hours)));
+    return timestamp >= (new Date(campaign.creationTime.getTime() + (60*60*1000*Math.abs(hours))));
   }
-  
