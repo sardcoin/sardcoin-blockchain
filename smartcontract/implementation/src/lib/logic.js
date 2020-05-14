@@ -17,7 +17,7 @@ async function onAddCoupons(tx){
       throw new Error('Only CREATED campaign can receive new coupons');
     }
   
-    // The campaign must be created less than "delay" hours ago
+    // The campaign must be created less than "delay" minutes ago
     if(isCampaignPublic(tx.campaign, tx.timestamp)){
       throw new Error('The deadline for creating campaign coupons is expired');
     }
@@ -62,7 +62,7 @@ async function onAddCoupons(tx){
     }
   */
   
-    // The campaign must be either in the CREATED or INITIALIZED state and must be created less "delay" hours ago
+    // The campaign must be either in the CREATED or INITIALIZED state and must be created less "delay" minutes ago
     if(isCampaignPublic(tx.campaign, tx.timestamp) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
       throw new Error('Delete deadline expired');
     }
@@ -102,7 +102,7 @@ async function onAddCoupons(tx){
       throw new Error('Only the Producer of this campaign is authorized to edit it');
     }
   */
-    // The campaign must be either in the CREATED or INITIALIZED state and must be created less "delay" hours ago
+    // The campaign must be either in the CREATED or INITIALIZED state and must be created less "delay" minutes ago
     if(isCampaignPublic(tx.campaign, tx.timestamp) || ((tx.campaign.state !== 'CREATED') && (tx.campaign.state !== 'INITIALIZED'))){
       throw new Error('Edit deadline expired');
     }
@@ -142,7 +142,7 @@ async function onAddCoupons(tx){
    */
   async function onBuyCoupon(tx){
   
-    // The campaign must be created more than "delay" hours ago
+    // The campaign must be created more than "delay" minutes ago
     if(!isCampaignPublic(tx.coupon.campaign, tx.timestamp)){
       throw new Error('Only coupons of a published campaign can be bought')
     }
@@ -303,19 +303,19 @@ async function onAddCoupons(tx){
 
 
   /**
-   * Given a campaign (within its creation time and hours of delay), and 
+   * Given a campaign (within its creation time and minutes of delay), and 
    * the timestamp of the current transaction, this function calculates the timestamp
    * of publication and evaluates if the campaign has already been published or not.
    */
   function isCampaignPublic(campaign, timestamp){
 
-    // If the number of hours of delay is zero, give 6 minutes of delay 
+    // If the number of minutes of delay is less than 10, give 10 minutes of delay 
     // for creating and publishing the addCoupons transaction 
-    if(campaign.delay == 0){
-      hours = 0.1;
+    if(campaign.delay <= 10){
+      minutes = 10;
     } else { 
-      hours = campaign.delay;
+      minutes = campaign.delay;
     }
     
-    return timestamp >= (new Date(campaign.creationTime.getTime() + (60*60*1000*Math.abs(hours))));
+    return timestamp >= (new Date(campaign.creationTime.getTime() + (60*1000*Math.abs(minutes))));
   }

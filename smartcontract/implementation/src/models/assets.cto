@@ -33,7 +33,7 @@ asset Campaign identified by campaignId {
   o Double price
   o Double economicValue
   o DateTime creationTime
-  o Integer delay default = 24
+  o Integer delay default = 1440
   o DateTime expirationTime optional
   o DateTime[] dateConstraints optional
 
