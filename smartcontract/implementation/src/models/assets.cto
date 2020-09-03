@@ -13,10 +13,18 @@ enum CampaignState {
 enum CouponState {
  o CREATED
  o CANCELED
+ o PACKAGED
  o BOUGHT
  o AWAITING
  o REDEEMED
  o EXPIRED
+}
+
+enum PackageState {
+  o CREATED
+  o CANCELED
+  o INITIALIZED
+  o BOUGHT
 }
 
 
@@ -39,6 +47,7 @@ asset Campaign identified by campaignId {
 
   --> Producer producer
   --> Verifier[] verifiers
+  --> Broker[] brokers
 
   --> Coupon[] coupons optional
 }
@@ -55,4 +64,24 @@ asset Coupon identified by couponId {
 
   --> Consumer consumer optional
   --> Campaign campaign optional
+}
+
+
+/**
+ * A Broker makes a Package of coupons
+ */
+asset Package identified by packageId {
+  o String packageId
+  o PackageState state default = 'CREATED'
+  
+  o String title
+  o Double price
+  o Double economicValue
+  o DateTime creationTime
+  o DateTime expirationTime optional
+  o DateTime[] dateConstraints optional
+
+  --> Broker broker
+
+  --> Coupon[] coupons optional
 }
