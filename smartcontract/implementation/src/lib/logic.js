@@ -14,7 +14,7 @@ async function onAddCoupons(tx){
   */
     // The campaign must be in the CREATED state
     if(tx.campaign.state !== 'CREATED'){
-      throw new Error('Only CREATED campaign can receive new coupons');
+      throw new Error('Only CREATED campaigns can receive new coupons');
     }
   
     // The campaign must be created less than "delay" minutes ago
@@ -285,7 +285,7 @@ async function onAddCoupons(tx){
     /*
       // The caller must be the producer of the campaign
       if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
-        throw new Error('Only the Producer of this campaign is authorized to add coupons to it');
+        throw new Error('Only the Producer of this campaign is authorized to add verifiers to it');
       }
     */
       const AP = 'eu.sardcoin.assets';
@@ -299,6 +299,89 @@ async function onAddCoupons(tx){
       // Update campaign registry
       campaignRegistry.update(tx.campaign);
     }
+
+
+
+  /**
+   * Add brokres to a campaign
+   * @param {eu.sardcoin.transactions.AddBrokers} tx The transaction instance.
+   * @transaction
+   * 
+   * CdU_***
+   */
+  async function onAddBrokers(tx){
+    /*
+      // The caller must be the producer of the campaign
+      if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.campaign.producer.getFullyQualifiedIdentifier()) {
+        throw new Error('Only the Producer of this campaign is authorized to add brokers to it');
+      }
+    */
+      const AP = 'eu.sardcoin.assets';
+      const campaignRegistry = await getAssetRegistry(AP + '.Campaign');
+    
+      // Add brokers
+      if(typeof tx.campaign.brokers === 'undefined'){
+        tx.campaign.brokers = []
+      }
+      for(i=0; i<tx.brokers.length; i++){
+        tx.campaign.brokers.push(tx.brokers[i]);
+      }
+    
+      // Update campaign registry
+      campaignRegistry.update(tx.campaign);
+    }
+
+
+
+/**
+ * Initialize a package by adding coupons
+ * @param {eu.sardcoin.transactions.InitPackage} tx The transaction instance.
+ * @transaction
+ * 
+ * CdU_***
+ */
+async function onInitPackage(tx){
+  /*
+    // The caller must be the broker of the package
+    if (getCurrentParticipant().getFullyQualifiedIdentifier() !== tx.package.broker.getFullyQualifiedIdentifier()) {
+      throw new Error('Only the Broker of this package is authorized to add coupons to it');
+    }
+  */
+
+    // The package must be in the CREATED state
+    if(tx.package.state !== 'CREATED'){
+      throw new Error('Only CREATED packages can receive new coupons');
+    }
+    
+    const AP = 'eu.sardcoin.assets';
+    const couponsRegistry = await getAssetRegistry(AP + '.Coupon');
+    const packagesRegistry = await getAssetRegistry(AP + '.Package');
+  
+    // All selected coupons must be in the CREATED state
+    // All selected coupons must be assigned to the current broker
+    for(i=0; i<tx.coupons.length; i++){
+      if(tx.coupons[i].state !== 'CREATED'){
+        throw new Error('Only CREATED coupons can be added to a package');
+      }
+
+      // Check if current caller is a broker listed in coupons[i].campaign.brokers
+      // [...]
+    }
+    
+    // Update coupons state
+    for(i=0; i<tx.coupons.length; i++){
+      tx.coupons[i].state = 'PACKAGED';
+      tx.coupons[i].package = tx.package;
+    }
+
+    // Update coupons registry
+    await couponsRegistry.updateAll(tx.coupons);
+  
+    // Update package registry
+    tx.package.coupons = tx.coupons;
+    tx.package.state = 'INITIALIZED';
+    packagesRegistry.update(tx.package);
+  }
 
 
 

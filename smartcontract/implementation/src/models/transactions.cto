@@ -48,3 +48,13 @@ transaction AddVerifiers {
   --> Campaign campaign
   --> Verifier[] verifiers
 }
+
+transaction AddBrokers {
+  --> Campaign campaign
+  --> Broker[] brokers
+}
+
+transaction InitPackage {
+  --> Package package
+  --> Coupon[] coupons
+}
