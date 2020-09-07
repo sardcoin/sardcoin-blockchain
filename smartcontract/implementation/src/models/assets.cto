@@ -83,6 +83,5 @@ asset Package identified by packageId {
   o DateTime[] dateConstraints optional
 
   --> Broker broker
-
   --> Coupon[] coupons optional
 }

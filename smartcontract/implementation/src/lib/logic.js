@@ -352,10 +352,6 @@ async function onInitPackage(tx){
     if(tx.package.state !== 'CREATED'){
       throw new Error('Only CREATED packages can receive new coupons');
     }
-    
-    const AP = 'eu.sardcoin.assets';
-    const couponsRegistry = await getAssetRegistry(AP + '.Coupon');
-    const packagesRegistry = await getAssetRegistry(AP + '.Package');
   
     // All selected coupons must be in the CREATED state
     // All selected coupons must be assigned to the current broker
@@ -374,13 +370,53 @@ async function onInitPackage(tx){
       tx.coupons[i].package = tx.package;
     }
 
+    const AP = 'eu.sardcoin.assets';
+    const couponsRegistry = await getAssetRegistry(AP + '.Coupon');
+    const packagesRegistry = await getAssetRegistry(AP + '.Package');
+    
     // Update coupons registry
-    await couponsRegistry.updateAll(tx.coupons);
+    couponsRegistry.updateAll(tx.coupons);
   
     // Update package registry
     tx.package.coupons = tx.coupons;
     tx.package.state = 'INITIALIZED';
     packagesRegistry.update(tx.package);
+  }
+
+
+
+  /**
+   * A consumer buys a package
+   * @param {eu.sardcoin.transactions.BuyPackage} tx The transaction instance.
+   * @transaction
+   * 
+   * CdU_***
+   */
+  async function onBuyPackage(tx){
+      
+    // The package must be in the INITIALIZED state
+    if(tx.package.state !== 'INITIALIZED'){
+      throw new Error('Only initialized packages can be bought');
+    }
+  
+    // The package is now bought
+    tx.package.state = 'BOUGHT';
+
+    // All related coupons are now bought
+    for(i=0; i<tx.package.coupons.length; i++){
+      tx.package.coupons[i].state = 'BOUGHT';
+  //  tx.package.coupons[i].consumer = getCurrentParticipant();
+      tx.package.coupons[i].consumer = tx.caller;
+    }
+    
+    const AP = 'eu.sardcoin.assets';
+    const couponsRegistry = await getAssetRegistry(AP + '.Coupon');
+    const packagesRegistry = await getAssetRegistry(AP + '.Package');
+
+    // Save the updated coupons and the package
+    couponsRegistry.updateAll(tx.package.coupons);
+    packagesRegistry.update(tx.package);
+
   }
 
 

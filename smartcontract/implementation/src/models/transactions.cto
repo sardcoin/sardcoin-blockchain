@@ -58,3 +58,8 @@ transaction InitPackage {
   --> Package package
   --> Coupon[] coupons
 }
+
+transaction BuyPackage {
+  --> Package package
+  --> Consumer caller
+}
