@@ -47,7 +47,7 @@ asset Campaign identified by campaignId {
 
   --> Producer producer
   --> Verifier[] verifiers
-  --> Broker[] brokers
+  --> Broker[] brokers optional
 
   --> Coupon[] coupons optional
 }
@@ -64,6 +64,7 @@ asset Coupon identified by couponId {
 
   --> Consumer consumer optional
   --> Campaign campaign optional
+  --> Package package optional
 }
 
 
