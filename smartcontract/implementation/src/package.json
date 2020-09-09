@@ -3,7 +3,7 @@
     "composer": "^0.20.8"
   },
   "name": "sardcoin",
-  "version": "0.0.1",
+  "version": "0.2.7",
   "description": "Network of the sardcoin project",
   "scripts": {
     "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName . -a ./dist/sardcoin.bna",
