@@ -297,7 +297,7 @@ async function onAddCoupons(tx){
       }
     
       // Update campaign registry
-      campaignRegistry.update(tx.campaign);
+      await campaignRegistry.update(tx.campaign);
     }
 
 
@@ -328,7 +328,7 @@ async function onAddCoupons(tx){
       }
     
       // Update campaign registry
-      campaignRegistry.update(tx.campaign);
+      await campaignRegistry.update(tx.campaign);
     }
 
 
@@ -375,12 +375,12 @@ async function onInitPackage(tx){
     const packagesRegistry = await getAssetRegistry(AP + '.Package');
     
     // Update coupons registry
-    couponsRegistry.updateAll(tx.coupons);
+    await couponsRegistry.updateAll(tx.coupons);
   
     // Update package registry
     tx.package.coupons = tx.coupons;
     tx.package.state = 'INITIALIZED';
-    packagesRegistry.update(tx.package);
+    await packagesRegistry.update(tx.package);
   }
 
 
@@ -414,8 +414,8 @@ async function onInitPackage(tx){
     const packagesRegistry = await getAssetRegistry(AP + '.Package');
 
     // Save the updated coupons and the package
-    couponsRegistry.updateAll(tx.package.coupons);
-    packagesRegistry.update(tx.package);
+    await couponsRegistry.updateAll(tx.package.coupons);
+    await packagesRegistry.update(tx.package);
 
   }
 
