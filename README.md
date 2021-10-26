@@ -1,4 +1,4 @@
-# sardcoin-core
+# sardcoin-blockchain
 IT cluster project funded by Autonomous Region of Sardinia (Italy).
 This project includes the source code of the platform smart contracts (to be installed in the blockchain), implemented and developed with Hyperledger Fabric.
 
